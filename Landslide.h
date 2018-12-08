@@ -3,16 +3,24 @@
 
 #include "XProblem.h"
 
+#define __toRadians(radius) radius*M_PI/180.f
+
 class Landslide: public XProblem {
     private:
-		double		m_chuteInclinationAngle = (5*M_PI)/4.f;
-		double		m_fluidRadius = 0.195;
-		double		m_chuteThickness = 0.2; //0.0035
-		double		m_chuteWidth = 1.6;
-		double		m_chuteHorizontalLength = 2.25;
-		double		m_chuteObliqueLength = 1.56;
-		double		m_deltaChuteObliqueLength = sqrt(2)*m_chuteThickness;
-		double		m_offset = -0.095;
+		/*
+			All measures are in meters. Angles are specified in degree, then converted in radiants;
+
+		*/
+		double		m_sphereRadius = 0.195f;
+		double		m_cupLatitudeCutAngle = __toRadians(30);
+		double		m_cupInitialHeight = m_sphereRadius - m_sphereRadius * sin(m_cupLatitudeCutAngle);
+		double		m_chuteInclinationAngle = __toRadians(45);
+		double		m_chuteWidth = 0.8f; //1.6f;
+		double		m_chuteThickness = 0.f; //init after set_deltap()
+		double		m_chuteHorizontalLength = 1.f; //2.25f;
+		double		m_chuteHorizontalOffset = -0.04; //-0.095f;
+		double		m_chuteObliqueLength = 1.56f;
+		double		m_chuteObliqueDelta = 0.f; //init after set_deltap()
 
     public:
         Landslide(GlobalData *);

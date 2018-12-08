@@ -9,10 +9,15 @@ Landslide::Landslide(GlobalData *_gdata) : XProblem(_gdata)
 	setFramework();
 
 	const int mlsIters = get_option("mls", 0); // --mls N to enable MLS filter every N iterations
-	const int ppH = get_option("ppH", 18); // --ppH N to change deltap to H/N
+	const int ppH = get_option("ppH", 16); // --ppH N to change deltap to H/N
 
 	if (mlsIters > 0) addFilter(MLS_FILTER, mlsIters);
-	set_deltap(1.f/ppH);
+
+	set_deltap(m_cupInitialHeight/ppH);
+	
+	m_chuteThickness = 3*m_deltap;
+	m_chuteObliqueDelta = sqrt(2) * m_chuteThickness;
+	m_chuteObliqueLength += m_chuteObliqueDelta;
 
 	// SPH parameters
 	setSPHParameters();
@@ -21,7 +26,7 @@ Landslide::Landslide(GlobalData *_gdata) : XProblem(_gdata)
 	setPhysicalParameters();
 
 	// Drawing and saving times
-	add_writer(VTKWRITER, 1.0);
+	add_writer(VTKWRITER, 0.01);
 
 	// Building the geometry
 	buildGeometry();
@@ -67,24 +72,44 @@ void Landslide::buildGeometry()
 {
 	setPositioning(PP_CENTER);
 
-	GeometryID fluid = addSphere(GT_FLUID, FT_SOLID,
-		Point(m_chuteWidth / 2, -1.105, 1.105), m_fluidRadius);
+	double3 maxChutePoint = make_double3( 0, //x
+		- m_chuteObliqueLength*cos(m_chuteInclinationAngle), //y
+		m_chuteObliqueLength*sin(m_chuteInclinationAngle) //z
+	);
+
+	double3 cupPositionDelta = make_double3( 0, //x
+		(m_sphereRadius*cos(m_cupLatitudeCutAngle))*cos(m_chuteInclinationAngle), //y
+		- (m_sphereRadius*cos(m_cupLatitudeCutAngle))*sin(m_chuteInclinationAngle) //z
+	);
+
+	double3 cupLatitudeCutDelta = make_double3( 0, //x
+		- (m_sphereRadius-m_cupInitialHeight)*cos(m_chuteInclinationAngle), //y
+		- (m_sphereRadius-m_cupInitialHeight)*sin(m_chuteInclinationAngle) //z
+	);
+
+	Point cupOriginPoint = Point(
+		m_chuteWidth / 2.f,
+		maxChutePoint.y + cupPositionDelta.y + cupLatitudeCutDelta.y,
+		maxChutePoint.z + cupPositionDelta.z + cupLatitudeCutDelta.z
+	);
+
+	GeometryID fluid = addSphere(GT_FLUID, FT_SOLID, cupOriginPoint, m_sphereRadius);
 	rotate(fluid, m_chuteInclinationAngle, 0.f, 0.f);
+
+	GeometryID obliquePlane = addPlane(0.0f, 1.0f, 1.0f, 0.0f);
+	setIntersectionType(obliquePlane, IT_INTERSECT);
+	//deleteGeometry(obliquePlane);
 
 	setPositioning(PP_CORNER);
 
 	GeometryID horizontalBox = addBox(GT_FIXED_BOUNDARY, FT_SOLID,
-		Point(0, m_offset, 0), m_chuteWidth, m_chuteHorizontalLength, m_chuteThickness);
+		Point(0, m_chuteHorizontalOffset, 0), m_chuteWidth, m_chuteHorizontalLength, m_chuteThickness);
 
-	GeometryID obliquePlane = addPlane(0.0f, 1.0f, 1.0f, 0.0f);
-	setIntersectionType(obliquePlane, IT_INTERSECT);
-	deleteGeometry(obliquePlane);
-	
 	GeometryID obliqueBox = addBox(GT_FIXED_BOUNDARY, FT_SOLID,
-		Point(0,0,0), m_chuteWidth, m_chuteObliqueLength + m_deltaChuteObliqueLength, m_chuteThickness);
-	rotate(obliqueBox, m_chuteInclinationAngle, 0.f, 0.f);
+		Point(0,0,0), m_chuteWidth, m_chuteObliqueLength, m_chuteThickness);
+	rotate(obliqueBox, M_PI+m_chuteInclinationAngle, 0.f, 0.f);
 
-	GeometryID horizontalPlane = addPlane(0.0f, 0.0f, 1.0f, 0.1f);
+	GeometryID horizontalPlane = addPlane(0.f, 0.f, 1.f, 0.01f);
 	setIntersectionType(horizontalPlane, IT_INTERSECT);
-	deleteGeometry(horizontalPlane);
+	//deleteGeometry(horizontalPlane);
 }
