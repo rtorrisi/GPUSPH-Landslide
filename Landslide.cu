@@ -96,9 +96,8 @@ void Landslide::buildGeometry()
 	GeometryID fluid = addSphere(GT_FLUID, FT_SOLID, cupOriginPoint, m_sphereRadius);
 	rotate(fluid, m_chuteInclinationAngle, 0.f, 0.f);
 
-	GeometryID obliquePlane = addPlane(0.0f, 1.0f, 1.0f, 0.0f);
+	GeometryID obliquePlane = addPlane(0.0f, 1.0f, 1.0f, 0.0f, FT_UNFILL);
 	setIntersectionType(obliquePlane, IT_INTERSECT);
-	//deleteGeometry(obliquePlane);
 
 	setPositioning(PP_CORNER);
 
@@ -109,7 +108,6 @@ void Landslide::buildGeometry()
 		Point(0,0,0), m_chuteWidth, m_chuteObliqueLength, m_chuteThickness);
 	rotate(obliqueBox, M_PI+m_chuteInclinationAngle, 0.f, 0.f);
 
-	GeometryID horizontalPlane = addPlane(0.f, 0.f, 1.f, 0.01f);
+	GeometryID horizontalPlane = addPlane(0.f, 0.f, 1.f, 0.01f, FT_UNFILL);
 	setIntersectionType(horizontalPlane, IT_INTERSECT);
-	//deleteGeometry(horizontalPlane);
 }
