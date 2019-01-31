@@ -1,3 +1,5 @@
+#include <string>
+
 #include "Landslide.h"
 #include "GlobalData.h"
 #include "cudasimframework.cu"
@@ -14,7 +16,7 @@ Landslide::Landslide(GlobalData *_gdata) : XProblem(_gdata)
 	if (mlsIters > 0) addFilter(MLS_FILTER, mlsIters);
 
 	set_deltap(m_cupInitialHeight/ppH);
-	
+
 	m_chuteThickness = 3*m_deltap;
 	m_chuteObliqueDelta = sqrt(2) * m_chuteThickness;
 	m_chuteObliqueLength += m_chuteObliqueDelta;
@@ -36,17 +38,24 @@ void Landslide::setFramework()
 {
 	// density diffusion terms, see DensityDiffusionType
 	const int	rhodiff = get_option("density-diffusion", 1);
+	const bool	newtonian = get_option("newtonian", false);
 
 	SETUP_FRAMEWORK(
-		viscosity<DYNAMICVISC>,
-		boundary<DYN_BOUNDARY>,
-		add_flags<ENABLE_PLANES>
+		rheology<PAPANASTASIOU>,
+		turbulence_model<LAMINAR_FLOW>,
+		visc_model<MORRIS>,
+		visc_average<HARMONIC>,
+		computational_visc<DYNAMIC>,
+		boundary<DYN_BOUNDARY>
+	).select_options(
+		newtonian, rheology<NEWTONIAN>()
 	);
 }
 
 void Landslide::setSPHParameters()
 {
 	simparams()->buildneibsfreq = 10;
+	simparams()->tend = 5.0f;
 }
 
 void Landslide::setPhysicalParameters()
@@ -62,10 +71,8 @@ void Landslide::setPhysicalParameters()
 	physparams()->r0 = m_deltap;
 	//physparams()->visccoeff = 0.05f;
 	set_kinematic_visc(0, 3.0e-2f);
-	//set_kinematic_visc(0, 1.0e-6f);
-	physparams()->artvisccoeff = 0.3f;
-	physparams()->epsartvisc = 0.01*simparams()->slength*simparams()->slength;
-	physparams()->epsxsph = 0.5f;
+	if (YIELDING_RHEOLOGY(simparams()->rheologytype))
+		set_yield_strength(0, 1.0f);
 }
 
 void Landslide::buildGeometry()
