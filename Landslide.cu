@@ -117,4 +117,12 @@ void Landslide::buildGeometry()
 
 	GeometryID horizontalPlane = addPlane(0.f, 0.f, 1.f, 0.01f, FT_UNFILL);
 	setIntersectionType(horizontalPlane, IT_INTERSECT);
+
+	// boolean value to add a "Tree" (cylinder) in the middle of the chute
+	const bool addTree = get_option("tree", false);
+	
+	if(addTree)
+	{
+		GeometryID tree = addCylinder(GT_FIXED_BOUNDARY, FT_SOLID, Point(m_chuteWidth/2.f - 0.1f, -0.4f, 0), 0.1f, 1.f);
+	}
 }
