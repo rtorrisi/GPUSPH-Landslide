@@ -1,12 +1,12 @@
 #include <string>
 
-#include "Landslide.h"
+#include "ChuteLandslide.h"
 #include "GlobalData.h"
 #include "cudasimframework.cu"
 
-Landslide::Landslide(GlobalData *_gdata) : XProblem(_gdata)
+ChuteLandslide::ChuteLandslide(GlobalData *_gdata) : XProblem(_gdata)
 {
-	m_name = "Landslide";
+	m_name = "ChuteLandslide";
 
 	setFramework();
 
@@ -34,7 +34,7 @@ Landslide::Landslide(GlobalData *_gdata) : XProblem(_gdata)
 	buildGeometry();
 }
 
-void Landslide::setFramework()
+void ChuteLandslide::setFramework()
 {
 	// density diffusion terms, see DensityDiffusionType
 	const int	rhodiff = get_option("density-diffusion", 1);
@@ -52,13 +52,13 @@ void Landslide::setFramework()
 	);
 }
 
-void Landslide::setSPHParameters()
+void ChuteLandslide::setSPHParameters()
 {
 	simparams()->buildneibsfreq = 10;
 	simparams()->tend = 5.0f;
 }
 
-void Landslide::setPhysicalParameters()
+void ChuteLandslide::setPhysicalParameters()
 {
 	physparams()->gravity = make_float3(0.0, 0.0, -9.81f);
 	const float g = length(physparams()->gravity);
@@ -75,7 +75,7 @@ void Landslide::setPhysicalParameters()
 		set_yield_strength(0, 1.0f);
 }
 
-void Landslide::buildGeometry()
+void ChuteLandslide::buildGeometry()
 {
 	setPositioning(PP_CENTER);
 

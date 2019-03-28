@@ -1,11 +1,11 @@
-#ifndef _LANDSLIDE_H
-#define	_LANDSLIDE_H
+#ifndef _CHUTELANDSLIDE_H
+#define	_CHUTELANDSLIDE_H
 
 #include "XProblem.h"
 
 #define __toRadians(radius) radius*M_PI/180.f
 
-class Landslide: public XProblem {
+class ChuteLandslide: public XProblem {
     private:
 		/*
 			All measures are in meters. Angles are specified in degree, then converted in radiants;
@@ -23,11 +23,11 @@ class Landslide: public XProblem {
 		double		m_chuteObliqueDelta = 0.f; //init after set_deltap()
 
     public:
-        Landslide(GlobalData *);
+        ChuteLandslide(GlobalData *);
 		void setFramework();
 		void setSPHParameters();
 		void setPhysicalParameters();
 		void buildGeometry();
 };
 
-#endif /*_LANDSLIDE_H */
+#endif /*_CHUTELANDSLIDE_H */
