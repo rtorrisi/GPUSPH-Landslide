@@ -43,7 +43,7 @@ void SubmarineLandslide::setFramework()
 		visc_average<HARMONIC>,
 		computational_visc<DYNAMIC>,
 		boundary<DYN_BOUNDARY>,
-		add_flags<ENABLE_PLANES>
+		periodicity<PERIODIC_Y>
 	).select_options(
 		newtonian, rheology<NEWTONIAN>()
 	);
@@ -88,11 +88,20 @@ void SubmarineLandslide::buildGeometry()
 
 	// This box is used to erase unnecessary fixed boundary particles
 	GeometryID optimizationBox = addBox(GT_FIXED_BOUNDARY, FT_NOFILL, Point(0.f, 0.f, 0.f),
-		m_chuteUpperWidth - m_gapFixOffset2, m_depth, m_chuteHeight - m_chuteThickness);
+		m_chuteUpperWidth - m_gapFixOffset2, m_depth, m_chuteHeight - m_chuteThickness + 0.025f);
 
 	GeometryID obliquePlane = addPlane(1.f, 0.f, 1.f, -m_chuteWidth - m_gapFixOffset, FT_UNFILL);
 	setIntersectionType(obliquePlane, IT_SUBTRACT);
+
+	GeometryID baseBoundary = addBox(GT_FIXED_BOUNDARY, FT_SOLID, Point(m_chuteWidth - 0.1f, 0.f, -0.125f),
+		m_waterBoxWidth - m_chuteWidth + 0.2f, m_depth, 0.1f);
+
+	GeometryID leftBoundary = addBox(GT_FIXED_BOUNDARY, FT_SOLID, Point(-0.125f, 0.f, m_chuteHeight - 0.1f),
+		0.1f, m_depth, 0.2f);
 	
+	GeometryID rightBoundary = addBox(GT_FIXED_BOUNDARY, FT_SOLID, Point(m_waterBoxWidth + 0.025f, 0.f, 0.f),
+		0.1f, m_depth, m_waterBoxHeight);
+
 	GeometryID waterBox = addBox(GT_FLUID, FT_SOLID, Point(0.f, 0.f, 0.f),
 		m_waterBoxWidth, m_depth, m_waterBoxHeight);
 	

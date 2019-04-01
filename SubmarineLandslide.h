@@ -23,7 +23,7 @@ class SubmarineLandslide: public XProblem {
 		double		m_chuteWidth 			= 2.5f;
 		double		m_chuteThickness		= 0.15f;
 
-		double		m_depth					= 2.f;
+		double		m_depth					= 1.f;
 		double		m_gapFixOffset			= 0.025f;
 		double		m_gapFixOffset2			= 0.005f;
 
