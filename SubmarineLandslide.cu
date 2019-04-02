@@ -102,8 +102,14 @@ void SubmarineLandslide::buildGeometry()
 	GeometryID rightBoundary = addBox(GT_FIXED_BOUNDARY, FT_SOLID, Point(m_waterBoxWidth + 0.025f, 0.f, 0.f),
 		0.1f, m_depth, m_waterBoxHeight);
 
-	GeometryID waterBox = addBox(GT_FLUID, FT_SOLID, Point(0.f, 0.f, 0.f),
-		m_waterBoxWidth, m_depth, m_waterBoxHeight);
+	// boolean value to fill the chute with with water
+	const int fillWater = get_option("fillWater", true);
+
+	if(fillWater)
+	{
+		GeometryID waterBox = addBox(GT_FLUID, FT_SOLID, Point(0.f, 0.f, 0.f),
+			m_waterBoxWidth, m_depth, m_waterBoxHeight);
+	}
 	
 	Point bulkPoint = Point(m_chuteUpperWidth, 0.f, m_chuteHeight - m_bulkHeight);
 	GeometryID bulk = addBox(GT_FLUID, FT_SOLID, bulkPoint,
@@ -113,6 +119,28 @@ void SubmarineLandslide::buildGeometry()
 	setEraseOperation(obliquePlane2, ET_ERASE_FLUID);
 	setIntersectionType(obliquePlane2, IT_INTERSECT);
 
-	GeometryID fixWaterBox = addBox(GT_FLUID, FT_SOLID, Point(0.f, 0.f, m_chuteHeight + 0.025),
-		m_waterBoxWidth, m_depth, m_waterBoxHeight - m_chuteHeight - m_gapFixOffset);
+	if(fillWater)
+	{
+		GeometryID fixWaterBox = addBox(GT_FLUID, FT_SOLID, Point(0.f, 0.f, m_chuteHeight + 0.025),
+			m_waterBoxWidth, m_depth, m_waterBoxHeight - m_chuteHeight - m_gapFixOffset);
+	}
+
+	setPositioning(PP_CENTER);
+
+	// boolean value to a "Tree" (cylinder) in the middle of the chute
+	const int addTree = get_option("tree", false);
+	
+	if(addTree){
+		GeometryID tree = addCylinder(GT_FIXED_BOUNDARY, FT_SOLID, Point(m_chuteWidth, m_depth/2.f, m_waterBoxHeight/2.f), 0.1f, m_waterBoxHeight);
+	}
+
+	// boolean value to add three "Pillars" (cylinder) at the end of the chute
+	const int addPillars = get_option("pillars", false);
+
+	if(addPillars)
+	{
+		GeometryID leftPillar = addBox(GT_FIXED_BOUNDARY, FT_SOLID, Point(m_chuteWidth + 1.f, m_depth/3.f, m_waterBoxHeight/2.f), 0.1f, 0.1f, m_waterBoxHeight);
+		GeometryID rightPillar = addBox(GT_FIXED_BOUNDARY, FT_SOLID, Point(m_chuteWidth + 1.f, 2*m_depth/3.f, m_waterBoxHeight/2.f), 0.1f, 0.1f, m_waterBoxHeight);
+	}
+
 }
